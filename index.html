@@ -709,15 +709,17 @@
       <div class="form-box">
         <h3>Book a Free Consultation</h3>
         <p class="fnote">Fields marked * are required. Your details are never shared.</p>
-        <form onsubmit="event.preventDefault(); window.location.href='mailto:hamza@averlonconsulting.com?subject=New enquiry from website';">
+        <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you.html" id="contactForm">
+          <input type="hidden" name="form-name" value="contact">
+          <p style="display:none;"><label>Don't fill this out: <input name="bot-field"></label></p>
           <div class="frow">
-            <div class="fgroup"><label>Full Name *</label><input type="text" placeholder="Jane Cooper" required></div>
-            <div class="fgroup"><label>Email *</label><input type="email" placeholder="jane@company.com" required></div>
+            <div class="fgroup"><label>Full Name *</label><input type="text" name="name" placeholder="Jane Cooper" required></div>
+            <div class="fgroup"><label>Email *</label><input type="email" name="email" placeholder="jane@company.com" required></div>
           </div>
           <div class="frow">
-            <div class="fgroup"><label>Company</label><input type="text" placeholder="Cooper &amp; Co."></div>
+            <div class="fgroup"><label>Company</label><input type="text" name="company" placeholder="Cooper &amp; Co."></div>
             <div class="fgroup"><label>Service of Interest</label>
-              <select>
+              <select name="service">
                 <option>Select a service (optional)</option>
                 <option>Accounting &amp; Bookkeeping</option>
                 <option>Financial Reporting</option>
@@ -731,9 +733,10 @@
           </div>
           <div class="fgroup" style="margin-bottom:24px;">
             <label>Your Message *</label>
-            <textarea rows="5" placeholder="Tell us about your business and what you'd like to achieve..." required></textarea>
+            <textarea rows="5" name="message" placeholder="Tell us about your business and what you'd like to achieve..." required></textarea>
           </div>
           <button type="submit" class="btn btn-fill">Send Enquiry →</button>
+          <p id="formStatus" style="display:none; margin-top:14px; font-size:13px;"></p>
         </form>
       </div>
     </div>
@@ -829,6 +832,34 @@
   document.getElementById('readerCta').addEventListener('click', closeReader);
   reader.addEventListener('click', function(e){ if(e.target === reader) closeReader(); });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape' && reader.classList.contains('open')) closeReader(); });
+})();
+</script>
+<script>
+(function(){
+  var form = document.getElementById('contactForm');
+  if(!form) return;
+  var status = document.getElementById('formStatus');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var data = new FormData(form);
+    fetch('/', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(data).toString() })
+      .then(function(r){
+        status.style.display = 'block';
+        if(r.ok){
+          status.style.color = '#3a7d44';
+          status.textContent = "Thank you — your message has been sent. We'll be in touch shortly.";
+          form.reset();
+        } else {
+          status.style.color = '#a3080a';
+          status.textContent = 'Something went wrong. Please email hamza@averlonconsulting.com directly.';
+        }
+      })
+      .catch(function(){
+        status.style.display = 'block';
+        status.style.color = '#a3080a';
+        status.textContent = 'Something went wrong. Please email hamza@averlonconsulting.com directly.';
+      });
+  });
 })();
 </script>
 </body>
